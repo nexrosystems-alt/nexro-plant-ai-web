@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexro Plant AI — Diagnóstico Inteligente de Cultivos</title>
+<meta name="description" content="Detecta enfermedades en tus cultivos con IA. 88 enfermedades, 20 cultivos, 93.7% de precisión. App de escritorio para Windows.">
+<link rel="icon" href="nexro.ico" type="image/x-icon">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════
+   VARIABLES & RESET
+══════════════════════════════════════════════════════ */
+:root {
+  --bg:       #080b12;
+  --bg2:      #0d1120;
+  --card:     #111827;
+  --card2:    #1a2236;
+  --acc:      #00e5a0;
+  --acc2:     #00c853;
+  --acc-dk:   #0a2a1f;
+  --text:     #ffffff;
+  --sub:      #7a8fa6;
+  --sub2:     #a8bcd0;
+  --bor:      #1e2d42;
+  --danger:   #ff4757;
+  --warn:     #ffab00;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ══════════════════════════════════════════════════════
+   BACKGROUND EFFECTS
+══════════════════════════════════════════════════════ */
+.bg-grid {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0,229,160,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,160,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.bg-glow {
+  position: fixed; top: -200px; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 800px; z-index: 0; pointer-events: none;
+  background: radial-gradient(circle, rgba(0,229,160,0.06) 0%, transparent 65%);
+}
+
+/* ══════════════════════════════════════════════════════
+   NAV
+══════════════════════════════════════════════════════ */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px; height: 68px;
+  background: rgba(8,11,18,0.85);
+  backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--bor);
+}
+
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800;
+  color: var(--text); text-decoration: none; letter-spacing: -0.03em;
+}
+
+.nav-logo .dot { color: var(--acc); }
+
+.nav-links { display: flex; align-items: center; gap: 8px; }
+
+.nav-links a {
+  color: var(--sub); font-size: 0.88rem; font-weight: 500;
+  text-decoration: none; padding: 8px 16px; border-radius: 8px;
+  transition: all 0.2s;
+}
+.nav-links a:hover { color: var(--text); background: var(--card2); }
+
+.nav-cta {
+  background: var(--acc) !important; color: #000 !important;
+  font-weight: 700 !important; border-radius: 10px !important;
+  padding: 10px 22px !important;
+  box-shadow: 0 0 20px rgba(0,229,160,0.3);
+  transition: all 0.2s !important;
+}
+.nav-cta:hover {
+  background: #00ffb3 !important;
+  box-shadow: 0 0 30px rgba(0,229,160,0.5) !important;
+  transform: translateY(-1px);
+}
+
+/* ══════════════════════════════════════════════════════
+   HERO
+══════════════════════════════════════════════════════ */
+.hero {
+  position: relative; z-index: 1;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  padding: 120px 24px 80px;
+}
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--acc-dk); border: 1px solid rgba(0,229,160,0.3);
+  color: var(--acc); padding: 8px 20px; border-radius: 100px;
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; margin-bottom: 32px;
+  animation: fadeUp 0.8s ease both;
+}
+
+.badge-dot {
+  width: 6px; height: 6px; background: var(--acc); border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.6); }
+}
+
+.hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2.8rem, 6vw, 5rem);
+  font-weight: 800; letter-spacing: -0.04em;
+  line-height: 1.05; margin-bottom: 8px;
+  animation: fadeUp 0.8s 0.1s ease both;
+}
+
+.hero h1 .acc { color: var(--acc); }
+
+.hero-sub {
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  color: var(--sub2); font-weight: 300;
+  max-width: 560px; margin: 16px auto 40px;
+  line-height: 1.7;
+  animation: fadeUp 0.8s 0.2s ease both;
+}
+
+/* Stats */
+.stats-row {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;
+  margin-bottom: 48px;
+  animation: fadeUp 0.8s 0.3s ease both;
+}
+
+.stat-chip {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--card); border: 1px solid var(--bor);
+  border-radius: 100px; padding: 10px 20px;
+  transition: all 0.2s;
+}
+.stat-chip:hover { border-color: rgba(0,229,160,0.3); transform: translateY(-2px); }
+
+.stat-val {
+  font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 800;
+  color: var(--acc);
+}
+.stat-lbl { font-size: 0.82rem; color: var(--sub); }
+
+/* CTA buttons */
+.hero-btns {
+  display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+  animation: fadeUp 0.8s 0.4s ease both;
+}
+
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--acc); color: #000;
+  font-weight: 800; font-size: 1rem;
+  padding: 16px 32px; border-radius: 12px;
+  text-decoration: none; transition: all 0.2s;
+  box-shadow: 0 8px 32px rgba(0,229,160,0.35);
+}
+.btn-primary:hover {
+  background: #00ffb3; transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,229,160,0.5);
+}
+
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: transparent; color: var(--acc);
+  font-weight: 700; font-size: 1rem;
+  padding: 16px 32px; border-radius: 12px;
+  text-decoration: none; transition: all 0.2s;
+  border: 2px solid var(--acc);
+}
+.btn-secondary:hover { background: rgba(0,229,160,0.08); transform: translateY(-3px); }
+
+/* App preview */
+.hero-preview {
+  position: relative; margin-top: 72px; width: 100%; max-width: 900px;
+  animation: fadeUp 0.8s 0.5s ease both;
+}
+
+.preview-glow {
+  position: absolute; inset: -2px; border-radius: 18px;
+  background: linear-gradient(135deg, var(--acc), transparent, var(--acc2));
+  opacity: 0.4; z-index: -1;
+  filter: blur(8px);
+}
+
+.preview-img {
+  width: 100%; border-radius: 16px;
+  border: 1px solid var(--bor);
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+}
+
+/* Scroll indicator */
+.scroll-hint {
+  position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  color: var(--sub); font-size: 0.75rem; letter-spacing: 1px;
+  animation: fadeIn 1s 1.2s ease both;
+}
+.scroll-arrow { animation: bounce 2s infinite; }
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+/* ══════════════════════════════════════════════════════
+   SECTIONS COMMONS
+══════════════════════════════════════════════════════ */
+section {
+  position: relative; z-index: 1;
+  padding: 100px 24px;
+}
+
+.container { max-width: 1100px; margin: 0 auto; }
+
+.section-tag {
+  display: flex; align-items: center; gap: 10px;
+  color: var(--acc); font-size: 0.75rem; font-weight: 800;
+  letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px;
+}
+.section-tag::before {
+  content: ''; width: 24px; height: 1px; background: var(--acc);
+}
+
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-weight: 800; letter-spacing: -0.03em;
+  margin-bottom: 16px; line-height: 1.1;
+}
+
+.section-sub {
+  color: var(--sub2); font-size: 1.05rem; font-weight: 300;
+  max-width: 520px; line-height: 1.7;
+}
+
+/* ══════════════════════════════════════════════════════
+   FEATURES
+══════════════════════════════════════════════════════ */
+#features { background: var(--bg2); }
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px; margin-top: 56px;
+}
+
+.feat-card {
+  background: var(--card); border: 1px solid var(--bor);
+  border-radius: 16px; padding: 28px;
+  transition: all 0.3s; position: relative; overflow: hidden;
+}
+.feat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--acc), transparent);
+  opacity: 0; transition: opacity 0.3s;
+}
+.feat-card:hover { border-color: rgba(0,229,160,0.25); transform: translateY(-4px); }
+.feat-card:hover::before { opacity: 1; }
+
+.feat-icon {
+  font-size: 2.2rem; margin-bottom: 16px; display: block;
+}
+.feat-title {
+  font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700;
+  margin-bottom: 10px;
+}
+.feat-desc { color: var(--sub2); font-size: 0.92rem; line-height: 1.6; }
+
+/* ══════════════════════════════════════════════════════
+   CULTIVOS
+══════════════════════════════════════════════════════ */
+#cultivos { background: var(--bg); }
+
+.cultivos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px; margin-top: 56px;
+}
+
+.cultivo-card {
+  background: var(--card); border: 1px solid var(--bor);
+  border-radius: 14px; padding: 20px 16px;
+  text-align: center; transition: all 0.25s;
+  cursor: default;
+}
+.cultivo-card:hover {
+  border-color: rgba(0,229,160,0.35);
+  background: var(--card2);
+  transform: translateY(-3px);
+}
+.cultivo-emoji { font-size: 2rem; margin-bottom: 8px; display: block; }
+.cultivo-name {
+  font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700;
+  margin-bottom: 4px;
+}
+.cultivo-count { color: var(--acc); font-size: 0.78rem; font-weight: 700; }
+
+/* ══════════════════════════════════════════════════════
+   SCREENSHOTS
+══════════════════════════════════════════════════════ */
+#screenshots { background: var(--bg2); }
+
+.shots-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 16px; margin-top: 56px;
+}
+
+.shot-card {
+  border-radius: 14px; overflow: hidden;
+  border: 1px solid var(--bor);
+  transition: all 0.3s; position: relative;
+}
+.shot-card:hover { border-color: rgba(0,229,160,0.3); transform: scale(1.02); }
+
+.shot-card img {
+  width: 100%; display: block;
+  transition: transform 0.4s;
+}
+.shot-card:hover img { transform: scale(1.03); }
+
+.shot-label {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(8,11,18,0.9));
+  padding: 24px 16px 14px;
+  font-size: 0.82rem; font-weight: 600; color: var(--sub2);
+}
+
+/* ══════════════════════════════════════════════════════
+   MODELO
+══════════════════════════════════════════════════════ */
+#modelo { background: var(--bg); }
+
+.modelo-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 48px; align-items: center; margin-top: 56px;
+}
+
+.modelo-stats { display: flex; flex-direction: column; gap: 16px; }
+
+.mstat {
+  display: flex; align-items: center; gap: 16px;
+  background: var(--card); border: 1px solid var(--bor);
+  border-radius: 14px; padding: 20px 24px;
+  transition: all 0.2s;
+}
+.mstat:hover { border-color: rgba(0,229,160,0.2); }
+
+.mstat-val {
+  font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800;
+  color: var(--acc); min-width: 80px;
+}
+.mstat-info { flex: 1; }
+.mstat-label { font-weight: 700; font-size: 0.95rem; margin-bottom: 2px; }
+.mstat-desc { color: var(--sub); font-size: 0.82rem; }
+
+.modelo-versions { display: flex; flex-direction: column; gap: 12px; }
+
+.ver-card {
+  background: var(--card); border: 1px solid var(--bor);
+  border-radius: 12px; padding: 18px 20px;
+  display: flex; align-items: center; gap: 16px;
+  transition: all 0.2s;
+}
+.ver-card.active {
+  border-color: var(--acc); background: var(--acc-dk);
+}
+.ver-badge {
+  background: var(--card2); color: var(--sub);
+  font-family: 'Space Mono', monospace; font-size: 0.78rem;
+  padding: 4px 10px; border-radius: 6px; white-space: nowrap;
+}
+.ver-card.active .ver-badge {
+  background: var(--acc); color: #000; font-weight: 700;
+}
+.ver-info { flex: 1; }
+.ver-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 2px; }
+.ver-details { color: var(--sub); font-size: 0.8rem; }
+.ver-card.active .ver-details { color: var(--acc); opacity: 0.8; }
+
+/* ══════════════════════════════════════════════════════
+   DOWNLOAD
+══════════════════════════════════════════════════════ */
+#download {
+  background: var(--bg2);
+  text-align: center;
+}
+
+.download-card {
+  background: var(--card); border: 1px solid var(--bor);
+  border-radius: 24px; padding: 64px 48px;
+  max-width: 700px; margin: 48px auto 0;
+  position: relative; overflow: hidden;
+}
+.download-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--acc), var(--acc2));
+}
+
+.download-icon { font-size: 4rem; margin-bottom: 16px; display: block; }
+.download-title {
+  font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800;
+  margin-bottom: 12px;
+}
+.download-desc { color: var(--sub2); margin-bottom: 32px; font-size: 1rem; }
+
+.download-info {
+  display: flex; justify-content: center; gap: 24px;
+  margin-top: 24px; flex-wrap: wrap;
+}
+.dinfo {
+  display: flex; align-items: center; gap: 6px;
+  color: var(--sub); font-size: 0.82rem;
+}
+.dinfo-dot { color: var(--acc); }
+
+.req-box {
+  background: var(--bg); border: 1px solid var(--bor);
+  border-radius: 12px; padding: 20px 24px;
+  margin-top: 28px; text-align: left;
+}
+.req-title { font-weight: 700; font-size: 0.85rem; margin-bottom: 10px; color: var(--sub); }
+.req-list {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+}
+.req-item { display: flex; gap: 8px; color: var(--sub2); font-size: 0.82rem; }
+.req-item::before { content: '✓'; color: var(--acc); font-weight: 700; }
+
+/* ══════════════════════════════════════════════════════
+   CONTACT
+══════════════════════════════════════════════════════ */
+#contact { background: var(--bg); text-align: center; }
+
+.contact-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 16px; margin-top: 48px; max-width: 700px; margin-left: auto; margin-right: auto;
+}
+
+.contact-card {
+  background: var(--card); border: 1px solid var(--bor);
+  border-radius: 14px; padding: 28px 20px;
+  text-decoration: none; transition: all 0.2s;
+}
+.contact-card:hover { border-color: rgba(0,229,160,0.3); transform: translateY(-3px); }
+.contact-icon { font-size: 1.8rem; margin-bottom: 10px; display: block; }
+.contact-label { color: var(--sub); font-size: 0.78rem; margin-bottom: 4px; }
+.contact-val { color: var(--text); font-size: 0.88rem; font-weight: 600; }
+
+/* ══════════════════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════════════════ */
+footer {
+  position: relative; z-index: 1;
+  border-top: 1px solid var(--bor);
+  padding: 32px 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+}
+
+.footer-logo {
+  font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800;
+  color: var(--text);
+}
+.footer-logo span { color: var(--acc); }
+
+.footer-copy { color: var(--sub); font-size: 0.82rem; }
+
+.footer-links { display: flex; gap: 20px; }
+.footer-links a {
+  color: var(--sub); font-size: 0.82rem; text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-links a:hover { color: var(--acc); }
+
+/* ══════════════════════════════════════════════════════
+   ANIMATIONS
+══════════════════════════════════════════════════════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.reveal {
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ══════════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .shots-grid { grid-template-columns: 1fr; }
+  .modelo-grid { grid-template-columns: 1fr; }
+  .contact-grid { grid-template-columns: 1fr; }
+  .download-card { padding: 40px 24px; }
+  .req-list { grid-template-columns: 1fr; }
+  footer { flex-direction: column; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+
+<!-- ══ NAV ══════════════════════════════════════════════ -->
+<nav>
+  <a href="#" class="nav-logo">🌿 Nexro<span class="dot">.</span> Plant AI</a>
+  <div class="nav-links">
+    <a href="#features">Características</a>
+    <a href="#cultivos">Cultivos</a>
+    <a href="#modelo">Modelo IA</a>
+    <a href="#screenshots">Screenshots</a>
+    <a href="#contact">Contacto</a>
+    <a href="https://github.com/nexrosystems-alt/nexro-plant-ai" target="_blank" class="nav-cta">Descargar gratis</a>
+  </div>
+</nav>
+
+<!-- ══ HERO ══════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-badge">
+    <span class="badge-dot"></span>
+    Sistema de diagnóstico fitosanitario con IA
+  </div>
+
+  <h1>Detecta enfermedades en<br>tus cultivos con <span class="acc">IA</span></h1>
+
+  <p class="hero-sub">
+    Sube una foto de una hoja y recibe un diagnóstico preciso en menos de 2 segundos.
+    88 enfermedades en 20 cultivos. Entrenado con imágenes reales de campo.
+  </p>
+
+  <div class="stats-row">
+    <div class="stat-chip"><span class="stat-val">88</span><span class="stat-lbl">Enfermedades</span></div>
+    <div class="stat-chip"><span class="stat-val">20</span><span class="stat-lbl">Cultivos</span></div>
+    <div class="stat-chip"><span class="stat-val">93.7%</span><span class="stat-lbl">Precisión</span></div>
+    <div class="stat-chip"><span class="stat-val">&lt;2s</span><span class="stat-lbl">Diagnóstico</span></div>
+    <div class="stat-chip"><span class="stat-val">79K+</span><span class="stat-lbl">Imágenes reales</span></div>
+  </div>
+
+  <div class="hero-btns">
+    <a href="https://github.com/nexrosystems-alt/nexro-plant-ai/releases" class="btn-primary" target="_blank">
+      📥 Descargar gratis — Windows
+    </a>
+    <a href="https://github.com/nexrosystems-alt/nexro-plant-ai" class="btn-secondary" target="_blank">
+      🐙 Ver en GitHub
+    </a>
+  </div>
+
+  <div class="hero-preview">
+    <div class="preview-glow"></div>
+    <img src="screenshots/home.png" alt="Nexro Plant AI — Pantalla principal" class="preview-img">
+  </div>
+
+  <div class="scroll-hint">
+    <span>EXPLORAR</span>
+    <span class="scroll-arrow">↓</span>
+  </div>
+</section>
+
+<!-- ══ FEATURES ══════════════════════════════════════════ -->
+<section id="features">
+  <div class="container">
+    <p class="section-tag reveal">Características</p>
+    <h2 class="section-title reveal">Todo lo que necesitas<br>en una sola app</h2>
+    <p class="section-sub reveal">Diseñada para agrónomos, productores y técnicos de campo. Sin internet, sin suscripción.</p>
+
+    <div class="features-grid">
+      <div class="feat-card reveal">
+        <span class="feat-icon">🔬</span>
+        <div class="feat-title">Diagnóstico instantáneo</div>
+        <div class="feat-desc">Analiza cualquier imagen de hoja en menos de 2 segundos. Solo arrastra la foto o selecciónala desde tu computador.</div>
+      </div>
+      <div class="feat-card reveal">
+        <span class="feat-icon">📊</span>
+        <div class="feat-title">Reportes Excel y PDF</div>
+        <div class="feat-desc">Genera reportes profesionales con descripción, tratamiento, prevención, confianza del modelo e imagen analizada.</div>
+      </div>
+      <div class="feat-card reveal">
+        <span class="feat-icon">📚</span>
+        <div class="feat-title">Catálogo completo</div>
+        <div class="feat-desc">Busca cualquier enfermedad o cultivo. Filtra por gravedad. Modal de detalle con toda la información agronómica.</div>
+      </div>
+      <div class="feat-card reveal">
+        <span class="feat-icon">🗂</span>
+        <div class="feat-title">Historial automático</div>
+        <div class="feat-desc">Los últimos 15 análisis se guardan automáticamente. Revisa diagnósticos anteriores con thumbnail, fecha y confianza.</div>
+      </div>
+      <div class="feat-card reveal">
+        <span class="feat-icon">🌐</span>
+        <div class="feat-title">100% offline</div>
+        <div class="feat-desc">Funciona sin internet. El modelo de IA corre directamente en tu computador. Tus datos nunca salen de tu PC.</div>
+      </div>
+      <div class="feat-card reveal">
+        <span class="feat-icon">💊</span>
+        <div class="feat-title">Tratamiento y prevención</div>
+        <div class="feat-desc">Para cada diagnóstico obtienes descripción técnica, tratamiento recomendado y medidas preventivas específicas.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CULTIVOS ══════════════════════════════════════════ -->
+<section id="cultivos">
+  <div class="container">
+    <p class="section-tag reveal">Cobertura</p>
+    <h2 class="section-title reveal">20 cultivos · 88 enfermedades</h2>
+    <p class="section-sub reveal">Desde cultivos tradicionales hasta exportación. Si tu planta está aquí, la app la detecta.</p>
+
+    <div class="cultivos-grid">
+      <div class="cultivo-card reveal"><span class="cultivo-emoji">🍎</span><div class="cultivo-name">Manzana</div><div class="cultivo-count">4 condiciones</div></div>
+      <div class="cultivo-card reveal"><span class="cultivo-emoji">🍅</span><div class="cultivo-name">Tomate</div><div class="cultivo-count">10 condiciones</div></div>
+      <div class="cultivo-card reveal"><span class="cultivo-emoji">☕</span><div class="cultivo-name">Café</div><div class="cultivo-count">4 condiciones</div></div>
+      <div class="cultivo-card reveal"><span class="cultivo-emoji">🌽</span><div class="cultivo-name">Maíz</div><div class="cultivo-count">4 condiciones</div></div>
+      <div class="cultivo-card reveal"><span class="cultivo-emoji">🥔</span><div class="cultivo-name">Papa</div><div class="cultivo-count">3 condiciones</div></div>
+      <div class="cultivo-card reveal"><span class="cultivo-emoji">🌾</span><div class="cultivo-name">Arroz</div><div class="cultivo-count">5 condiciones</div></div>
+      <div class="cultivo-card reveal"><span class="cultivo-emoji">🌱</span><div class="cultivo-name">Soya</div><div class="cultivo-count">9 condiciones</div></div>
+      <div class="cultivo-card reveal"><span class="cultivo-emoji">🍵</span><div class="cultivo-name">Té</div><div class="cultivo-count">6 condiciones</div></div>
+      <div class="cultivo-card reveal"><span class="cultivo-emoji">🌶️</span><div class="cultivo-name">Ají</div><div class="cultivo-count">5 condiciones</div></div>
+      <div class="cultivo-card reveal"><span class="cultivo-emoji">🌿</span><div class="cultivo-name">Yuca</div><div class="cultivo-count">5 condiciones</div></div>
+      <div class="cultivo-card reveal"><span class="cultivo-emoji">🍇</span><div class="cultivo-name">Uva</div><div class="cultivo-count">4 condiciones</div></div>
+      <div class="cultivo-card reveal"><span class="cultivo-emoji">🌾</span><div class="cultivo-name">Trigo</div><div class="cultivo-count">4 condiciones</div></div>
+      <div class="cultivo-card reveal"><span class="cultivo-emoji">🌾</span><div class="cultivo-name">Caña</div><div class="cultivo-count">5 condiciones</div></div>
+      <div class="cultivo-card reveal"><span class="cultivo-emoji">🥭</span><div class="cultivo-name">Mango</div><div class="cultivo-count">2 condiciones</div></div>
+      <div class="cultivo-card reveal"><span class="cultivo-emoji">🍋</span><div class="cultivo-name">Limón</div><div class="cultivo-count">2 condiciones</div></div>
+      <div class="cultivo-card reveal"><span class="cultivo-emoji">🍓</span><div class="cultivo-name">Fresa</div><div class="cultivo-count">2 condiciones</div></div>
+      <div class="cultivo-card reveal"><span class="cultivo-emoji">🍑</span><div class="cultivo-name">Melocotón</div><div class="cultivo-count">2 condiciones</div></div>
+      <div class="cultivo-card reveal"><span class="cultivo-emoji">🫑</span><div class="cultivo-name">Pimentón</div><div class="cultivo-count">2 condiciones</div></div>
+      <div class="cultivo-card reveal"><span class="cultivo-emoji">🥒</span><div class="cultivo-name">Pepino</div><div class="cultivo-count">2 condiciones</div></div>
+      <div class="cultivo-card reveal"><span class="cultivo-emoji">🍒</span><div class="cultivo-name">Cerezo</div><div class="cultivo-count">2 condiciones</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SCREENSHOTS ═══════════════════════════════════════ -->
+<section id="screenshots">
+  <div class="container">
+    <p class="section-tag reveal">Vista previa</p>
+    <h2 class="section-title reveal">La app por dentro</h2>
+    <p class="section-sub reveal">Interfaz profesional y moderna. Diseñada para ser rápida e intuitiva.</p>
+
+    <div class="shots-grid">
+      <div class="shot-card reveal">
+        <img src="screenshots/home.png" alt="Pantalla de inicio">
+        <div class="shot-label">🏠 Pantalla de inicio</div>
+      </div>
+      <div class="shot-card reveal">
+        <img src="screenshots/analisis.png" alt="Pantalla de análisis">
+        <div class="shot-label">🔬 Análisis con IA</div>
+      </div>
+      <div class="shot-card reveal">
+        <img src="screenshots/catalogo.png" alt="Catálogo de enfermedades">
+        <div class="shot-label">📚 Catálogo completo</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ MODELO ════════════════════════════════════════════ -->
+<section id="modelo">
+  <div class="container">
+    <p class="section-tag reveal">Inteligencia Artificial</p>
+    <h2 class="section-title reveal">Modelo entrenado con<br>imágenes reales de campo</h2>
+
+    <div class="modelo-grid">
+      <div class="modelo-stats">
+        <div class="mstat reveal">
+          <div class="mstat-val">93.7%</div>
+          <div class="mstat-info">
+            <div class="mstat-label">Precisión top-1</div>
+            <div class="mstat-desc">Validado con imágenes reales de campo</div>
+          </div>
+        </div>
+        <div class="mstat reveal">
+          <div class="mstat-val">79K</div>
+          <div class="mstat-info">
+            <div class="mstat-label">Imágenes de entrenamiento</div>
+            <div class="mstat-desc">Fotos tomadas directamente en cultivos</div>
+          </div>
+        </div>
+        <div class="mstat reveal">
+          <div class="mstat-val">&lt;2s</div>
+          <div class="mstat-info">
+            <div class="mstat-label">Tiempo de inferencia</div>
+            <div class="mstat-desc">En CPU estándar sin GPU dedicada</div>
+          </div>
+        </div>
+        <div class="mstat reveal">
+          <div class="mstat-val">88</div>
+          <div class="mstat-info">
+            <div class="mstat-label">Clases detectables</div>
+            <div class="mstat-desc">Enfermedades y estados de salud</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modelo-versions reveal">
+        <div class="ver-card">
+          <div class="ver-badge">v1</div>
+          <div class="ver-info">
+            <div class="ver-name">Versión 1 — Laboratorio</div>
+            <div class="ver-details">41K imgs · 15 clases · 99.9% precisión</div>
+          </div>
+        </div>
+        <div class="ver-card">
+          <div class="ver-badge">v2</div>
+          <div class="ver-info">
+            <div class="ver-name">Versión 2 — Mixto</div>
+            <div class="ver-details">87K imgs · 38 clases · 99.8% precisión</div>
+          </div>
+        </div>
+        <div class="ver-card active">
+          <div class="ver-badge">v3 ✓</div>
+          <div class="ver-info">
+            <div class="ver-name">Versión 3 — Campo Real</div>
+            <div class="ver-details">79K imgs · 88 clases · 93.7% precisión</div>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--bor);border-radius:12px;padding:18px 20px;" class="reveal">
+          <div style="color:var(--sub);font-size:0.8rem;margin-bottom:8px;font-weight:600;">STACK TECNOLÓGICO</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <span style="background:var(--card2);color:var(--acc);padding:4px 10px;border-radius:6px;font-size:0.78rem;font-family:'Space Mono',monospace;">YOLOv8</span>
+            <span style="background:var(--card2);color:var(--acc);padding:4px 10px;border-radius:6px;font-size:0.78rem;font-family:'Space Mono',monospace;">PyTorch</span>
+            <span style="background:var(--card2);color:var(--acc);padding:4px 10px;border-radius:6px;font-size:0.78rem;font-family:'Space Mono',monospace;">PyQt6</span>
+            <span style="background:var(--card2);color:var(--acc);padding:4px 10px;border-radius:6px;font-size:0.78rem;font-family:'Space Mono',monospace;">OpenCV</span>
+            <span style="background:var(--card2);color:var(--acc);padding:4px 10px;border-radius:6px;font-size:0.78rem;font-family:'Space Mono',monospace;">Python 3.11</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ DOWNLOAD ══════════════════════════════════════════ -->
+<section id="download">
+  <div class="container">
+    <p class="section-tag reveal" style="justify-content:center;">Descarga</p>
+    <h2 class="section-title reveal" style="text-align:center;">Gratis para Windows</h2>
+
+    <div class="download-card reveal">
+      <span class="download-icon">🌿</span>
+      <div class="download-title">Nexro Plant AI v3.0 Pro</div>
+      <div class="download-desc">Instalador completo para Windows 10/11 de 64 bits.<br>Sin suscripción, sin internet, sin límites.</div>
+
+      <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+        <a href="https://github.com/nexrosystems-alt/nexro-plant-ai/releases" class="btn-primary" target="_blank">
+          📥 Descargar instalador (.exe)
+        </a>
+        <a href="https://github.com/nexrosystems-alt/nexro-plant-ai" class="btn-secondary" target="_blank">
+          🐙 Código fuente
+        </a>
+      </div>
+
+      <div class="download-info">
+        <div class="dinfo"><span class="dinfo-dot">●</span> ~350 MB</div>
+        <div class="dinfo"><span class="dinfo-dot">●</span> Windows 10/11 64-bit</div>
+        <div class="dinfo"><span class="dinfo-dot">●</span> Sin GPU requerida</div>
+        <div class="dinfo"><span class="dinfo-dot">●</span> 100% offline</div>
+      </div>
+
+      <div class="req-box">
+        <div class="req-title">REQUISITOS MÍNIMOS</div>
+        <div class="req-list">
+          <div class="req-item">Windows 10 / 11 (64-bit)</div>
+          <div class="req-item">4 GB de RAM</div>
+          <div class="req-item">1 GB de espacio libre</div>
+          <div class="req-item">No requiere GPU</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CONTACT ═══════════════════════════════════════════ -->
+<section id="contact">
+  <div class="container">
+    <p class="section-tag reveal" style="justify-content:center;">Contacto</p>
+    <h2 class="section-title reveal" style="text-align:center;">¿Tienes preguntas?</h2>
+    <p class="section-sub reveal" style="margin:0 auto 0;">Escríbenos para licencias empresariales, soporte técnico o consultas comerciales.</p>
+
+    <div class="contact-grid">
+      <a href="mailto:nexrosystems@gmail.com" class="contact-card reveal">
+        <span class="contact-icon">📧</span>
+        <div class="contact-label">EMAIL</div>
+        <div class="contact-val">nexrosystems@gmail.com</div>
+      </a>
+      <a href="https://wa.me/573215217396" class="contact-card reveal" target="_blank">
+        <span class="contact-icon">📱</span>
+        <div class="contact-label">WHATSAPP</div>
+        <div class="contact-val">+57 321 521 7396</div>
+      </a>
+      <a href="https://github.com/nexrosystems-alt" class="contact-card reveal" target="_blank">
+        <span class="contact-icon">🐙</span>
+        <div class="contact-label">GITHUB</div>
+        <div class="contact-val">nexrosystems-alt</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-logo">🌿 Nexro<span>.</span> Plant AI</div>
+  <div class="footer-copy">© 2026 Nexro Systems — Todos los derechos reservados</div>
+  <div class="footer-links">
+    <a href="https://github.com/nexrosystems-alt/nexro-plant-ai" target="_blank">GitHub</a>
+    <a href="mailto:nexrosystems@gmail.com">Contacto</a>
+  </div>
+</footer>
+
+<script>
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), i * 80);
+    }
+  });
+}, { threshold: 0.08 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Nav scroll effect
+window.addEventListener('scroll', () => {
+  const nav = document.querySelector('nav');
+  nav.style.borderBottomColor = window.scrollY > 50
+    ? 'rgba(0,229,160,0.15)'
+    : 'var(--bor)';
+});
+</script>
+</body>
+</html>
