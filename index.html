@@ -520,6 +520,113 @@ footer {
 .reveal.visible { opacity: 1; transform: translateY(0); }
 
 /* ══════════════════════════════════════════════════════
+   MODAL DE DEMO
+══════════════════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 999;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.modal-overlay.active {
+  opacity: 1; pointer-events: all;
+}
+
+.modal {
+  background: var(--card); border: 1px solid var(--bor);
+  border-radius: 24px; padding: 0;
+  width: 100%; max-width: 480px;
+  transform: translateY(30px) scale(0.97);
+  transition: transform 0.3s ease;
+  overflow: hidden;
+  position: relative;
+}
+.modal-overlay.active .modal {
+  transform: translateY(0) scale(1);
+}
+
+.modal-header {
+  background: var(--acc-dk);
+  border-bottom: 2px solid var(--acc);
+  padding: 28px 32px 24px;
+  text-align: center;
+}
+.modal-icon { font-size: 2.8rem; display: block; margin-bottom: 10px; }
+.modal-title {
+  font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800;
+  margin-bottom: 6px;
+}
+.modal-sub { color: var(--sub2); font-size: 0.9rem; }
+
+.modal-body { padding: 28px 32px 32px; }
+
+.modal-perks {
+  display: flex; flex-direction: column; gap: 8px;
+  margin-bottom: 24px;
+}
+.modal-perk {
+  display: flex; align-items: center; gap: 10px;
+  color: var(--sub2); font-size: 0.9rem;
+}
+.modal-perk span:first-child { color: var(--acc); font-weight: 700; }
+
+.form-group { margin-bottom: 14px; }
+.form-group label {
+  display: block; font-size: 0.8rem; font-weight: 700;
+  color: var(--sub); margin-bottom: 6px; letter-spacing: 0.5px;
+}
+.form-group input, .form-group select {
+  width: 100%; background: var(--bg2);
+  border: 1px solid var(--bor); border-radius: 10px;
+  color: var(--text); font-size: 0.95rem; font-family: 'DM Sans', sans-serif;
+  padding: 12px 16px; outline: none;
+  transition: border-color 0.2s;
+}
+.form-group input:focus, .form-group select:focus {
+  border-color: var(--acc);
+}
+.form-group input::placeholder { color: var(--sub); }
+
+.form-group select option { background: var(--card2); }
+
+.btn-submit {
+  width: 100%; background: var(--acc); color: #000;
+  font-weight: 800; font-size: 1rem; font-family: 'DM Sans', sans-serif;
+  padding: 14px; border-radius: 12px; border: none;
+  cursor: pointer; transition: all 0.2s; margin-top: 6px;
+}
+.btn-submit:hover { background: #00ffb3; transform: translateY(-2px); }
+
+.modal-close {
+  position: absolute; top: 14px; right: 16px;
+  background: transparent; border: none;
+  color: var(--sub); font-size: 1.4rem; cursor: pointer;
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.modal-close:hover { background: var(--card2); color: var(--text); }
+
+.modal-note {
+  text-align: center; color: var(--sub); font-size: 0.78rem;
+  margin-top: 12px;
+}
+
+/* Estado de éxito */
+.modal-success {
+  padding: 48px 32px; text-align: center; display: none;
+}
+.success-icon { font-size: 4rem; margin-bottom: 16px; display: block; }
+.success-title {
+  font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800;
+  margin-bottom: 10px;
+}
+.success-sub { color: var(--sub2); font-size: 0.95rem; line-height: 1.6; }
+
+/* ══════════════════════════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
@@ -548,7 +655,7 @@ footer {
     <a href="#modelo">Modelo IA</a>
     <a href="#screenshots">Screenshots</a>
     <a href="#contact">Contacto</a>
-    <a href="https://drive.google.com/uc?export=download&id=1mmoCt6LFY2V5_DBIGDqdOzj9wACoX98F" target="_blank" class="nav-cta">Descargar gratis</a>
+    <a href="#" onclick="abrirModal(event)" class="nav-cta">🌿 Solicitar demo gratis</a>
   </div>
 </nav>
 
@@ -575,8 +682,8 @@ footer {
   </div>
 
   <div class="hero-btns">
-    <a href="https://drive.google.com/file/d/1mmoCt6LFY2V5_DBIGDqdOzj9wACoX98F/view?usp=drive_link" class="btn-primary" target="_blank">
-      📥 Descargar gratis — Windows
+    <a href="#" onclick="abrirModal(event)" class="btn-primary">
+      🌿 Solicitar demo gratuita — 7 días
     </a>
     <a href="https://github.com/nexrosystems-alt/nexro-plant-ai" class="btn-secondary" target="_blank">
       🐙 Ver en GitHub
@@ -770,25 +877,28 @@ footer {
 <!-- ══ DOWNLOAD ══════════════════════════════════════════ -->
 <section id="download">
   <div class="container">
-    <p class="section-tag reveal" style="justify-content:center;">Descarga</p>
-    <h2 class="section-title reveal" style="text-align:center;">Gratis para Windows</h2>
+    <p class="section-tag reveal" style="justify-content:center;">Demo gratuita</p>
+    <h2 class="section-title reveal" style="text-align:center;">Pruébala 7 días gratis</h2>
 
     <div class="download-card reveal">
       <span class="download-icon">🌿</span>
       <div class="download-title">Nexro Plant AI v3.0 Pro</div>
-      <div class="download-desc">Instalador completo para Windows 10/11 de 64 bits.<br>Sin suscripción, sin internet, sin límites.</div>
+      <div class="download-desc">
+        Solicita tu demo gratuita de 7 días.<br>
+        Te enviamos el instalador completo y te acompañamos en la configuración.
+      </div>
 
       <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
-        <a href="https://drive.google.com/file/d/1mmoCt6LFY2V5_DBIGDqdOzj9wACoX98F/view?usp=drive_link" class="btn-primary" target="_blank">
-          📥 Descargar instalador (.exe)
+        <a href="#" onclick="abrirModal(event)" class="btn-primary">
+          🌿 Solicitar demo — 7 días gratis
         </a>
         <a href="https://github.com/nexrosystems-alt/nexro-plant-ai" class="btn-secondary" target="_blank">
-          🐙 Código fuente
+          🐙 Ver código fuente
         </a>
       </div>
 
       <div class="download-info">
-        <div class="dinfo"><span class="dinfo-dot">●</span> ~350 MB</div>
+        <div class="dinfo"><span class="dinfo-dot">●</span> 7 días sin costo</div>
         <div class="dinfo"><span class="dinfo-dot">●</span> Windows 10/11 64-bit</div>
         <div class="dinfo"><span class="dinfo-dot">●</span> Sin GPU requerida</div>
         <div class="dinfo"><span class="dinfo-dot">●</span> 100% offline</div>
@@ -839,13 +949,92 @@ footer {
   <div class="footer-logo">🌿 Nexro<span>.</span> Plant AI</div>
   <div class="footer-copy">© 2026 Nexro Systems — Todos los derechos reservados</div>
   <div class="footer-links">
-    <a href="https://drive.google.com/uc?export=download&id=1mmoCt6LFY2V5_DBIGDqdOzj9wACoX98F" target="_blank">GitHub</a>
+    <a href="https://github.com/nexrosystems-alt/nexro-plant-ai" target="_blank">GitHub</a>
     <a href="mailto:nexrosystems@gmail.com">Contacto</a>
   </div>
 </footer>
 
+<!-- ══ MODAL DEMO ═════════════════════════════════════════ -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="cerrarModal()">✕</button>
+
+    <!-- Formulario -->
+    <div id="modalForm">
+      <div class="modal-header">
+        <span class="modal-icon">🌿</span>
+        <div class="modal-title">Demo gratuita — 7 días</div>
+        <div class="modal-sub">Completa el formulario y te contactamos en menos de 24 horas</div>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-perks">
+          <div class="modal-perk"><span>✅</span><span>Acceso completo por 7 días sin costo</span></div>
+          <div class="modal-perk"><span>✅</span><span>Instalador para Windows listo para usar</span></div>
+          <div class="modal-perk"><span>✅</span><span>Acompañamiento en la configuración</span></div>
+          <div class="modal-perk"><span>✅</span><span>Sin tarjeta de crédito requerida</span></div>
+        </div>
+
+        <div class="form-group">
+          <label>NOMBRE COMPLETO *</label>
+          <input type="text" id="campo-nombre" placeholder="Tu nombre y apellido">
+        </div>
+
+        <div class="form-group">
+          <label>CORREO ELECTRÓNICO *</label>
+          <input type="email" id="campo-email" placeholder="tu@correo.com">
+        </div>
+
+        <div class="form-group">
+          <label>WHATSAPP *</label>
+          <input type="tel" id="campo-wa" placeholder="+57 300 000 0000">
+        </div>
+
+        <div class="form-group">
+          <label>TIPO DE ORGANIZACIÓN</label>
+          <select id="campo-org">
+            <option value="">Selecciona una opción</option>
+            <option>Agrónomo independiente</option>
+            <option>Cooperativa agrícola</option>
+            <option>Finca / empresa agropecuaria</option>
+            <option>Institución educativa</option>
+            <option>Entidad gubernamental</option>
+            <option>Otro</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>¿CUÁL ES TU CULTIVO PRINCIPAL?</label>
+          <input type="text" id="campo-cultivo" placeholder="Ej: café, tomate, papa...">
+        </div>
+
+        <button class="btn-submit" onclick="enviarFormulario()">
+          🚀 Solicitar demo gratuita
+        </button>
+
+        <div class="modal-note">
+          Al enviar aceptas que te contactemos por los medios indicados.<br>
+          No compartimos tu información con terceros.
+        </div>
+      </div>
+    </div>
+
+    <!-- Éxito -->
+    <div class="modal-success" id="modalSuccess">
+      <span class="success-icon">🎉</span>
+      <div class="success-title">¡Solicitud enviada!</div>
+      <div class="success-sub">
+        Gracias por tu interés en Nexro Plant AI.<br><br>
+        Te contactaremos en las próximas <strong style="color:var(--acc)">24 horas</strong>
+        por WhatsApp o correo para enviarte el instalador y acompañarte en la configuración.<br><br>
+        <span style="color:var(--sub)">📧 nexrosystems@gmail.com<br>📱 +57 321 521 7396</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
-// Scroll reveal
+// ── Scroll reveal ────────────────────────────────────────
 const observer = new IntersectionObserver((entries) => {
   entries.forEach((e, i) => {
     if (e.isIntersecting) {
@@ -853,16 +1042,69 @@ const observer = new IntersectionObserver((entries) => {
     }
   });
 }, { threshold: 0.08 });
-
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-// Nav scroll effect
+// ── Nav scroll effect ────────────────────────────────────
 window.addEventListener('scroll', () => {
   const nav = document.querySelector('nav');
   nav.style.borderBottomColor = window.scrollY > 50
     ? 'rgba(0,229,160,0.15)'
     : 'var(--bor)';
 });
+
+// ── Modal ────────────────────────────────────────────────
+function abrirModal(e) {
+  if (e) e.preventDefault();
+  document.getElementById('modalOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function cerrarModal() {
+  document.getElementById('modalOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+// Cerrar al hacer click fuera
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) cerrarModal();
+});
+
+// Cerrar con ESC
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') cerrarModal();
+});
+
+// ── Enviar formulario ────────────────────────────────────
+function enviarFormulario() {
+  const nombre  = document.getElementById('campo-nombre').value.trim();
+  const email   = document.getElementById('campo-email').value.trim();
+  const wa      = document.getElementById('campo-wa').value.trim();
+  const org     = document.getElementById('campo-org').value;
+  const cultivo = document.getElementById('campo-cultivo').value.trim();
+
+  if (!nombre || !email || !wa) {
+    alert('Por favor completa los campos obligatorios (nombre, email y WhatsApp).');
+    return;
+  }
+
+  // Armar mensaje de WhatsApp para Gabriel
+  const msg = encodeURIComponent(
+    `🌿 *NUEVA SOLICITUD DE DEMO — Nexro Plant AI*\n\n` +
+    `👤 *Nombre:* ${nombre}\n` +
+    `📧 *Email:* ${email}\n` +
+    `📱 *WhatsApp:* ${wa}\n` +
+    `🏢 *Organización:* ${org || 'No especificó'}\n` +
+    `🌱 *Cultivo:* ${cultivo || 'No especificó'}\n\n` +
+    `Solicita demo gratuita de 7 días desde la landing page.`
+  );
+
+  // Abrir WhatsApp de Gabriel con la info
+  window.open(`https://wa.me/573215217396?text=${msg}`, '_blank');
+
+  // Mostrar éxito
+  document.getElementById('modalForm').style.display = 'none';
+  document.getElementById('modalSuccess').style.display = 'block';
+}
 </script>
 </body>
 </html>
